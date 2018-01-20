@@ -16,5 +16,23 @@ namespace UbiGamesBackupTool
         {
             InitializeComponent();
         }
+
+        private void buttonBackup_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            if (this.folderBrowserDialog1.ShowDialog() == DialogResult.OK)
+            {
+                this.textBox1.Text = folderBrowserDialog1.SelectedPath;
+            }
+        }
+
+        private void buttonBackupTo_Click(object sender, EventArgs e)
+        {
+
+        }
     }
 }
