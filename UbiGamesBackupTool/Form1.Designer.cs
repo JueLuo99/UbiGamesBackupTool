@@ -35,6 +35,7 @@
             this.folderBrowserDialogBackupTo = new System.Windows.Forms.FolderBrowserDialog();
             this.textBoxBackupTo = new System.Windows.Forms.TextBox();
             this.buttonBackupTo = new System.Windows.Forms.Button();
+            this.uplaylocation = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // buttonBackup
@@ -82,11 +83,20 @@
             this.buttonBackupTo.UseVisualStyleBackColor = true;
             this.buttonBackupTo.Click += new System.EventHandler(this.buttonBackupTo_Click);
             // 
+            // uplaylocation
+            // 
+            this.uplaylocation.AutoSize = true;
+            this.uplaylocation.Location = new System.Drawing.Point(13, 8);
+            this.uplaylocation.Name = "uplaylocation";
+            this.uplaylocation.Size = new System.Drawing.Size(0, 12);
+            this.uplaylocation.TabIndex = 5;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(506, 227);
+            this.Controls.Add(this.uplaylocation);
             this.Controls.Add(this.buttonBackupTo);
             this.Controls.Add(this.textBoxBackupTo);
             this.Controls.Add(this.buttonBackupFrom);
@@ -109,6 +119,7 @@
         private System.Windows.Forms.FolderBrowserDialog folderBrowserDialogBackupTo;
         private System.Windows.Forms.TextBox textBoxBackupTo;
         private System.Windows.Forms.Button buttonBackupTo;
+        private System.Windows.Forms.Label uplaylocation;
     }
 }
 

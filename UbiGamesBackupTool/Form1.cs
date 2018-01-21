@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Microsoft.Win32;
 
 namespace UbiGamesBackupTool
 {
@@ -96,10 +97,28 @@ namespace UbiGamesBackupTool
         }
 
 
+        //uplay install location --> HKEY_CLASSES_ROOT\uplay\Shell\Open\Command
+        /// <summary>
+        /// 从注册表中获取Uplay在磁盘中的安装位置
+        /// </summary>
+        /// <returns>键值</returns>
+        private string GetRegistData()
+        {
+            string registData;
+            RegistryKey hkml = Registry.ClassesRoot;
+            RegistryKey uplay = hkml.OpenSubKey("uplay", true);
+            RegistryKey Shell = uplay.OpenSubKey("Shell", true);
+            RegistryKey Open = Shell.OpenSubKey("Open", true);
+            RegistryKey Command = Open.OpenSubKey("Command", true);
+            registData = Command.GetValue("").ToString();
+            return registData;
+        }
 
 
         private void Form1_Load(object sender, EventArgs e)
         {
+            string uplaylocation = GetRegistData().Split(new char[] { '"', })[1];
+            this.uplaylocation.Text = uplaylocation.Substring(0, uplaylocation.LastIndexOf('\\'));
             if (Directory.Exists(@"C:\Program Files (x86)\Ubisoft\Ubisoft Game Launcher\savegames")) textBoxBackupFrom.Text = @"C:\Program Files (x86)\Ubisoft\Ubisoft Game Launcher\savegames";
             if (Directory.Exists(@"D:\Program Files (x86)\Ubisoft\Ubisoft Game Launcher\savegames")) textBoxBackupFrom.Text = @"D:\Program Files (x86)\Ubisoft\Ubisoft Game Launcher\savegames";
             if (Directory.Exists(@"C:\Program Files\Ubisoft\Ubisoft Game Launcher\savegames")) textBoxBackupFrom.Text = @"C:\Program Files\Ubisoft\Ubisoft Game Launcher\savegames";
