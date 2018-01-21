@@ -1,6 +1,6 @@
 ﻿namespace UbiGamesBackupTool
 {
-    partial class Form1
+    partial class FormMain
     {
         /// <summary>
         /// 必需的设计器变量。
@@ -35,7 +35,7 @@
             this.folderBrowserDialogBackupTo = new System.Windows.Forms.FolderBrowserDialog();
             this.textBoxBackupTo = new System.Windows.Forms.TextBox();
             this.buttonBackupTo = new System.Windows.Forms.Button();
-            this.uplaylocation = new System.Windows.Forms.Label();
+            this.labelTip1 = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // buttonBackup
@@ -83,26 +83,27 @@
             this.buttonBackupTo.UseVisualStyleBackColor = true;
             this.buttonBackupTo.Click += new System.EventHandler(this.buttonBackupTo_Click);
             // 
-            // uplaylocation
+            // labelTip1
             // 
-            this.uplaylocation.AutoSize = true;
-            this.uplaylocation.Location = new System.Drawing.Point(13, 8);
-            this.uplaylocation.Name = "uplaylocation";
-            this.uplaylocation.Size = new System.Drawing.Size(0, 12);
-            this.uplaylocation.TabIndex = 5;
+            this.labelTip1.AutoSize = true;
+            this.labelTip1.Location = new System.Drawing.Point(10, 60);
+            this.labelTip1.Name = "labelTip1";
+            this.labelTip1.Size = new System.Drawing.Size(101, 12);
+            this.labelTip1.TabIndex = 5;
+            this.labelTip1.Text = "自动检测到的路径";
             // 
-            // Form1
+            // FormMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(506, 227);
-            this.Controls.Add(this.uplaylocation);
+            this.Controls.Add(this.labelTip1);
             this.Controls.Add(this.buttonBackupTo);
             this.Controls.Add(this.textBoxBackupTo);
             this.Controls.Add(this.buttonBackupFrom);
             this.Controls.Add(this.textBoxBackupFrom);
             this.Controls.Add(this.buttonBackup);
-            this.Name = "Form1";
+            this.Name = "FormMain";
             this.Text = "Form1";
             this.Load += new System.EventHandler(this.Form1_Load);
             this.ResumeLayout(false);
@@ -119,7 +120,7 @@
         private System.Windows.Forms.FolderBrowserDialog folderBrowserDialogBackupTo;
         private System.Windows.Forms.TextBox textBoxBackupTo;
         private System.Windows.Forms.Button buttonBackupTo;
-        private System.Windows.Forms.Label uplaylocation;
+        private System.Windows.Forms.Label labelTip1;
     }
 }
 

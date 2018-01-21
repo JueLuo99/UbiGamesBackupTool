@@ -12,9 +12,9 @@ using Microsoft.Win32;
 
 namespace UbiGamesBackupTool
 {
-    public partial class Form1 : Form
+    public partial class FormMain : Form
     {
-        public Form1()
+        public FormMain()
         {
             InitializeComponent();
         }
@@ -97,15 +97,16 @@ namespace UbiGamesBackupTool
         }
 
 
-        //uplay install location --> HKEY_CLASSES_ROOT\uplay\Shell\Open\Command
-        /// <summary>
-        /// 从注册表中获取Uplay在磁盘中的安装位置
-        /// </summary>
-        /// <returns>键值</returns>
+        
         private string GetRegistData()
         {
+            //uplay install location --> HKEY_CLASSES_ROOT\uplay\Shell\Open\Command
+            /// <summary>
+            /// 从注册表中获取Uplay在磁盘中的安装位置
+            /// </summary>
+            /// <returns>键值</returns>
             string registData;
-            RegistryKey hkml = Registry.ClassesRoot;
+            RegistryKey hkml = Registry.ClassesRoot;            //为啥叫hkml 因为是辣子鸡根据别人的改的 然后忘了改
             RegistryKey uplay = hkml.OpenSubKey("uplay", true);
             RegistryKey Shell = uplay.OpenSubKey("Shell", true);
             RegistryKey Open = Shell.OpenSubKey("Open", true);
@@ -118,11 +119,14 @@ namespace UbiGamesBackupTool
         private void Form1_Load(object sender, EventArgs e)
         {
             string uplaylocation = GetRegistData().Split(new char[] { '"', })[1];
-            this.uplaylocation.Text = uplaylocation.Substring(0, uplaylocation.LastIndexOf('\\'));
+            textBoxBackupFrom.Text = (uplaylocation.Substring(0, uplaylocation.LastIndexOf('\\'))) + "\\savegames"; //存档位置，接下来遇到的就是单个/多个用户的文件夹
+            if (textBoxBackupFrom.Text != "") labelTip1.Text = "已自动探测到存档路径";
+            /*
             if (Directory.Exists(@"C:\Program Files (x86)\Ubisoft\Ubisoft Game Launcher\savegames")) textBoxBackupFrom.Text = @"C:\Program Files (x86)\Ubisoft\Ubisoft Game Launcher\savegames";
-            if (Directory.Exists(@"D:\Program Files (x86)\Ubisoft\Ubisoft Game Launcher\savegames")) textBoxBackupFrom.Text = @"D:\Program Files (x86)\Ubisoft\Ubisoft Game Launcher\savegames";
-            if (Directory.Exists(@"C:\Program Files\Ubisoft\Ubisoft Game Launcher\savegames")) textBoxBackupFrom.Text = @"C:\Program Files\Ubisoft\Ubisoft Game Launcher\savegames";
-            if (Directory.Exists(@"D:\Program Files\Ubisoft\Ubisoft Game Launcher\savegames")) textBoxBackupFrom.Text = @"D:\Program Files\Ubisoft\Ubisoft Game Launcher\savegames";
+            else if (Directory.Exists(@"D:\Program Files (x86)\Ubisoft\Ubisoft Game Launcher\savegames")) textBoxBackupFrom.Text = @"D:\Program Files (x86)\Ubisoft\Ubisoft Game Launcher\savegames";
+            else if (Directory.Exists(@"C:\Program Files\Ubisoft\Ubisoft Game Launcher\savegames")) textBoxBackupFrom.Text = @"C:\Program Files\Ubisoft\Ubisoft Game Launcher\savegames";
+            else if (Directory.Exists(@"D:\Program Files\Ubisoft\Ubisoft Game Launcher\savegames")) textBoxBackupFrom.Text = @"D:\Program Files\Ubisoft\Ubisoft Game Launcher\savegames";
+            */       
         }
     }
 }
