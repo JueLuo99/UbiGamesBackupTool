@@ -97,36 +97,39 @@ namespace UbiGamesBackupTool
         }
 
 
-        
-        private string GetRegistData()
+
+
+        private string GetUplayPath()
         {
-            //uplay install location --> HKEY_CLASSES_ROOT\uplay\Shell\Open\Command
-            /// <summary>
-            /// 从注册表中获取Uplay在磁盘中的安装位置
-            /// </summary>
-            /// <returns>键值</returns>
-            string registData;
-            RegistryKey hkml = Registry.ClassesRoot;            //为啥叫hkml 因为是辣子鸡根据别人的改的 然后忘了改
-            RegistryKey uplay = hkml.OpenSubKey("uplay", true);
-            RegistryKey Shell = uplay.OpenSubKey("Shell", true);
-            RegistryKey Open = Shell.OpenSubKey("Open", true);
-            RegistryKey Command = Open.OpenSubKey("Command", true);
-            registData = Command.GetValue("").ToString();
-            return registData;
+            try
+            {
+                string strKeyName = string.Empty;
+                string softPath = @"SOFTWARE\Classes\uplay\Shell\Open\Command";
+                RegistryKey regKey = Registry.LocalMachine;
+                RegistryKey regSubKey = regKey.OpenSubKey(softPath, false);
+
+                object objResult = regSubKey.GetValue(strKeyName);
+                RegistryValueKind regValueKind = regSubKey.GetValueKind(strKeyName);
+                if (regValueKind == Microsoft.Win32.RegistryValueKind.String)
+                {
+                    return objResult.ToString();
+                }
+            }
+            catch
+            {
+                labelTip1.Text = "自动获取Uplay安装路径失败";
+            }
+            return null;
         }
 
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            string uplaylocation = GetRegistData().Split(new char[] { '"', })[1];
-            textBoxBackupFrom.Text = (uplaylocation.Substring(0, uplaylocation.LastIndexOf('\\'))) + "\\savegames"; //存档位置，接下来遇到的就是单个/多个用户的文件夹
+            labelTip1.Text = "正在尝试自动探测路径";
+            textBoxBackupFrom.Text = GetUplayPath().Split(new char[] { '"', })[1];
+            textBoxBackupFrom.Text = (textBoxBackupFrom.Text.Substring(0, textBoxBackupFrom.Text.LastIndexOf('\\'))) + "\\savegames"; 
+            //这里已经到达存档位置，接下来遇到的就是单个/多个用户的文件夹
             if (textBoxBackupFrom.Text != "") labelTip1.Text = "已自动探测到存档路径";
-            /*
-            if (Directory.Exists(@"C:\Program Files (x86)\Ubisoft\Ubisoft Game Launcher\savegames")) textBoxBackupFrom.Text = @"C:\Program Files (x86)\Ubisoft\Ubisoft Game Launcher\savegames";
-            else if (Directory.Exists(@"D:\Program Files (x86)\Ubisoft\Ubisoft Game Launcher\savegames")) textBoxBackupFrom.Text = @"D:\Program Files (x86)\Ubisoft\Ubisoft Game Launcher\savegames";
-            else if (Directory.Exists(@"C:\Program Files\Ubisoft\Ubisoft Game Launcher\savegames")) textBoxBackupFrom.Text = @"C:\Program Files\Ubisoft\Ubisoft Game Launcher\savegames";
-            else if (Directory.Exists(@"D:\Program Files\Ubisoft\Ubisoft Game Launcher\savegames")) textBoxBackupFrom.Text = @"D:\Program Files\Ubisoft\Ubisoft Game Launcher\savegames";
-            */       
         }
     }
 }
