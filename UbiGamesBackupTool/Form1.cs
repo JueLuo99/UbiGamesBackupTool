@@ -117,7 +117,7 @@ namespace UbiGamesBackupTool
             }
             catch
             {
-                labelTip1.Text = "自动获取Uplay安装路径失败";
+               return "自动获取Uplay安装路径失败,请尝试手动选择";
             }
             return null;
         }
@@ -125,7 +125,7 @@ namespace UbiGamesBackupTool
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            labelTip1.Text = "正在尝试自动探测路径";
+            labelTip1.Text = "正在尝试自动探测路径...";
             textBoxBackupFrom.Text = GetUplayPath().Split(new char[] { '"', })[1];
             textBoxBackupFrom.Text = (textBoxBackupFrom.Text.Substring(0, textBoxBackupFrom.Text.LastIndexOf('\\'))) + "\\savegames"; 
             //这里已经到达存档位置，接下来遇到的就是单个/多个用户的文件夹
