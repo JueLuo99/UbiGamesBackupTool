@@ -35,7 +35,7 @@ namespace UbiGamesBackupTool
 
             foreach (string file in filenames)// 遍历所有的文件和目录
             {
-                if (Directory.Exists(file))// 先当作目录处理如果存在这个目录就递归Copy该目录下面的文件
+                if (Directory.Exists(file))// 先当作目录处理 如果存在这个目录就递归Copy该目录下面的文件
                 {
 
                     string currentdir = desfolderdir + "\\" + file.Substring(file.LastIndexOf("\\") + 1);
@@ -60,7 +60,7 @@ namespace UbiGamesBackupTool
                     }
 
 
-                    File.Copy(file, srcfileName,true);
+                    File.Copy(file, srcfileName, true);
                 }
             } 
         }
@@ -93,6 +93,17 @@ namespace UbiGamesBackupTool
             {
                 textBoxBackupTo.Text = folderBrowserDialogBackupTo.SelectedPath;
             }
+        }
+
+
+
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            if (Directory.Exists(@"C:\Program Files (x86)\Ubisoft\Ubisoft Game Launcher\savegames")) textBoxBackupFrom.Text = @"C:\Program Files (x86)\Ubisoft\Ubisoft Game Launcher\savegames";
+            if (Directory.Exists(@"D:\Program Files (x86)\Ubisoft\Ubisoft Game Launcher\savegames")) textBoxBackupFrom.Text = @"D:\Program Files (x86)\Ubisoft\Ubisoft Game Launcher\savegames";
+            if (Directory.Exists(@"C:\Program Files\Ubisoft\Ubisoft Game Launcher\savegames")) textBoxBackupFrom.Text = @"C:\Program Files\Ubisoft\Ubisoft Game Launcher\savegames";
+            if (Directory.Exists(@"D:\Program Files\Ubisoft\Ubisoft Game Launcher\savegames")) textBoxBackupFrom.Text = @"D:\Program Files\Ubisoft\Ubisoft Game Launcher\savegames";
         }
     }
 }
