@@ -78,10 +78,11 @@ namespace UbiGamesBackupTool
                             int uidstart = content.IndexOf('$', pos) + 1;
                             int uidend = content.IndexOf('*', uidstart);
                             string uid = content.Substring(uidstart, uidend - uidstart);
-                            int unamestart = content.IndexOf('', uidend)+1;
+                            //int unamestart = content.IndexOf('', uidend)+1;
+                            int unamestart = content.IndexOf("=2",uidend) + 3;
                             int unameend = content.IndexOf(':', unamestart);
                             string username = content.Substring(unamestart, unameend - unamestart);
-                            //Console.WriteLine("UID:" + uid+"    UserName:"+username);
+                            Console.WriteLine("UID:" + uid+"    UserName:"+username);
                             UserInfo.Add("uid", uid);
                             UserInfo.Add("username", username);
                             UserList.Add(UserInfo);
