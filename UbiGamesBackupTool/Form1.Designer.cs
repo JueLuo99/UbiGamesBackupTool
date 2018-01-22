@@ -47,7 +47,7 @@
             this.buttonBackup.TabIndex = 0;
             this.buttonBackup.Text = "开始备份";
             this.buttonBackup.UseVisualStyleBackColor = true;
-            this.buttonBackup.Click += new System.EventHandler(this.buttonBackup_Click);
+            this.buttonBackup.Click += new System.EventHandler(this.ButtonBackup_Click);
             // 
             // textBoxBackupFrom
             // 
@@ -64,7 +64,7 @@
             this.buttonBackupFrom.TabIndex = 2;
             this.buttonBackupFrom.Text = "备份自...";
             this.buttonBackupFrom.UseVisualStyleBackColor = true;
-            this.buttonBackupFrom.Click += new System.EventHandler(this.button1_Click);
+            this.buttonBackupFrom.Click += new System.EventHandler(this.Button1_Click);
             // 
             // textBoxBackupTo
             // 
@@ -81,7 +81,7 @@
             this.buttonBackupTo.TabIndex = 4;
             this.buttonBackupTo.Text = "备份到...";
             this.buttonBackupTo.UseVisualStyleBackColor = true;
-            this.buttonBackupTo.Click += new System.EventHandler(this.buttonBackupTo_Click);
+            this.buttonBackupTo.Click += new System.EventHandler(this.ButtonBackupTo_Click);
             // 
             // labelTip1
             // 
