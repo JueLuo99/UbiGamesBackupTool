@@ -116,15 +116,18 @@ namespace UbiGamesBackupTool
             {
                 //-----------------------------开始添加用户---------------------------
 
-                PictureBox pictureBox = new PictureBox();
-                flowLayoutPanel1.Controls.Add(pictureBox);
+                Button button = new Button();
+                button.Margin = new Padding(0, 0, 0, 0);
+                flowLayoutPanel1.Controls.Add(button);
                 string uid = userinfo["uid"];
                 string uname = userinfo["username"];
                 string imgpath = USERICONLOCATION + "\\" + uid + "_64.png";
-                pictureBox.Image = OverDrawHeadImg(imgpath);
-                pictureBox.Size = new Size(48,48);
-                pictureBox.SizeMode = PictureBoxSizeMode.Zoom;
-                toolTip1.SetToolTip(pictureBox, uname);
+                button.BackgroundImage = OverDrawHeadImg(imgpath);
+                button.Size = new Size(40,40);
+                button.BackgroundImageLayout = ImageLayout.Zoom;
+                button.FlatStyle = FlatStyle.Flat;
+                button.FlatAppearance.BorderSize = 0;
+                toolTip1.SetToolTip(button, uname);
                 InitForm();
                 //CheckGameSaveDirectory();
                 InitGameListPanel();
@@ -142,6 +145,8 @@ namespace UbiGamesBackupTool
             flowLayoutPanel1.Location = new Point(button1.Width, 0);
             button2.Location = new Point(this.Width - button2.Width, 0);
             flowLayoutPanel2.Location = new Point(flowLayoutPanel2.Location.X, button1.Location.Y + button1.Height);
+            flowLayoutPanel2.Height = this.Height - flowLayoutPanel2.Location.Y;
+            panel1.Location = new Point(panel1.Location.X, flowLayoutPanel2.Location.Y);
         }
 
         private void Form2_MouseDown(object sender, MouseEventArgs e)
@@ -282,6 +287,7 @@ namespace UbiGamesBackupTool
                 FlowLayoutPanel panel = new FlowLayoutPanel();
                 panel.FlowDirection = FlowDirection.TopDown;
                 panel.AutoSize = true;
+
                 PictureBox pictureBox = new PictureBox();
                 Label label = new Label();
                 panel.Controls.Add(pictureBox);
@@ -291,14 +297,17 @@ namespace UbiGamesBackupTool
                 pictureBox.Image = gamepanelbackground;
                 pictureBox.Size = new Size(340, 181);
                 pictureBox.SizeMode = PictureBoxSizeMode.CenterImage;
-                pictureBox.BackColor = Color.Black;
+                pictureBox.BackColor = Color.FromArgb(192,192,192);
+                pictureBox.Margin = new Padding(0, 0, 0, 0);
 
 
                 label.AutoSize = true;
+                label.Margin = new Padding(0, 0, 0, 0);
+                label.Padding = new Padding(0, 2, 0, 2);
                 label.Text = g.name;
                 label.TextAlign = ContentAlignment.MiddleCenter;
                 label.Dock = DockStyle.Bottom;
-                label.BackColor = Color.Blue;
+                label.BackColor = Color.FromArgb(208,208,208);
             }
         }
         public void ChangeUsered()
