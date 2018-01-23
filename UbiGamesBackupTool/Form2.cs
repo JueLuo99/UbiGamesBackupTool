@@ -110,55 +110,37 @@ namespace UbiGamesBackupTool
 
         private void Form2_Load(object sender, EventArgs e)
         {
-
             Control.ControlCollection controls = flowLayoutPanel1.Controls;
             List<Dictionary<string, string>> userlist = GetAllUserInfo();
             foreach (Dictionary<string, string> userinfo in userlist)
             {
-                FlowLayoutPanel panel = new FlowLayoutPanel();
-                panel.FlowDirection = FlowDirection.TopDown;
+                //-----------------------------开始添加用户---------------------------
+
                 PictureBox pictureBox = new PictureBox();
-                Label label = new Label();
-                panel.Controls.Add(label);
-
-
-
+                flowLayoutPanel1.Controls.Add(pictureBox);
                 string uid = userinfo["uid"];
                 string uname = userinfo["username"];
                 string imgpath = USERICONLOCATION + "\\" + uid + "_64.png";
-
                 pictureBox.Image = OverDrawHeadImg(imgpath);
-                pictureBox.Size = new Size(32, 32);
+                pictureBox.Size = new Size(48,48);
                 pictureBox.SizeMode = PictureBoxSizeMode.Zoom;
-                pictureBox.Margin = new Padding(0, 0, 0, 0);
-                pictureBox.Parent = panel;
-                pictureBox.Dock = DockStyle.Fill;
-                panel.Controls.Add(pictureBox);
-
-                label.AutoSize = true;
-                label.TextAlign = ContentAlignment.MiddleCenter;
-                label.Padding = new Padding(0, 0, 0, 0);
-                label.Margin = new Padding(0, 0, 0, 0);
-                label.Text = uname;
-                label.Dock = DockStyle.Top;
-                label.Parent = panel;
                 toolTip1.SetToolTip(pictureBox, uname);
-
-                panel.Parent = flowLayoutPanel1;
-                panel.AutoSize = true;
-                panel.Dock = DockStyle.Fill;
-                controls.Add(panel);
-
                 InitForm();
                 //CheckGameSaveDirectory();
                 InitGameListPanel();
             }
         }
+        /// <summary>
+        /// 初始化窗体
+        /// </summary>
         public void InitForm()
         {
             SelectedUid = GetAllUserInfo()[0]["uid"];
             button1.Size = new Size(flowLayoutPanel1.Height, flowLayoutPanel1.Height);
             button2.Size = new Size(flowLayoutPanel1.Height, flowLayoutPanel1.Height);
+            flowLayoutPanel1.Width = this.Width - button1.Width * 2;
+            flowLayoutPanel1.Location = new Point(button1.Width, 0);
+            button2.Location = new Point(this.Width - button2.Width, 0);
             flowLayoutPanel2.Location = new Point(flowLayoutPanel2.Location.X, button1.Location.Y + button1.Height);
         }
 
@@ -235,8 +217,8 @@ namespace UbiGamesBackupTool
                 Bitmap b = new Bitmap(i.Width, i.Height);
                 using (Graphics g = Graphics.FromImage(b))
                 {
-                    g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
-                    using (System.Drawing.Drawing2D.GraphicsPath p = new System.Drawing.Drawing2D.GraphicsPath(System.Drawing.Drawing2D.FillMode.Alternate))
+                    g.SmoothingMode = SmoothingMode.HighQuality;
+                    using (GraphicsPath p = new GraphicsPath(FillMode.Alternate))
                     {
                         p.AddEllipse(0, 0, i.Width, i.Height);
                         g.FillPath(new TextureBrush(i), p);
@@ -317,8 +299,6 @@ namespace UbiGamesBackupTool
                 label.TextAlign = ContentAlignment.MiddleCenter;
                 label.Dock = DockStyle.Bottom;
                 label.BackColor = Color.Blue;
-
-
             }
         }
         public void ChangeUsered()
