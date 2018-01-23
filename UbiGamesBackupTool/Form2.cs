@@ -1,11 +1,16 @@
 ﻿using Microsoft.Win32;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.IO;
 using System.Linq;
+using System.Reflection;
+using System.Resources;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -16,7 +21,12 @@ namespace UbiGamesBackupTool
     {
 
         static string USERINFOLOCATION = System.Environment.GetEnvironmentVariable("USERPROFILE") + "\\AppData\\Local\\Ubisoft Game Launcher\\users.dat";
+        static string UPLAYSAVEGAME = GetUplayPath().Split(new char[] { '"', })[1].Substring(0, GetUplayPath().LastIndexOf('\\')) + "\\savegames";
         static string USERICONLOCATION = GetUplayPath().Split(new char[] { '"', })[1].Substring(0, GetUplayPath().LastIndexOf('\\')) + "\\cache\\avatars";
+
+        static Image gamepanelbackground = Properties.Resources.gamepanelbackground;
+
+        private string SelectedUid { get; set; } = null;
 
         bool beginMove = false;//初始化鼠标位置  
         int currentXPosition;
@@ -79,10 +89,10 @@ namespace UbiGamesBackupTool
                             int uidend = content.IndexOf('*', uidstart);
                             string uid = content.Substring(uidstart, uidend - uidstart);
                             //int unamestart = content.IndexOf('', uidend)+1;
-                            int unamestart = content.IndexOf("=2",uidend) + 3;
+                            int unamestart = content.IndexOf("=2", uidend) + 3;
                             int unameend = content.IndexOf(':', unamestart);
                             string username = content.Substring(unamestart, unameend - unamestart);
-                            Console.WriteLine("UID:" + uid+"    UserName:"+username);
+                            Console.WriteLine("UID:" + uid + "    UserName:" + username);
                             UserInfo.Add("uid", uid);
                             UserInfo.Add("username", username);
                             UserList.Add(UserInfo);
@@ -100,49 +110,56 @@ namespace UbiGamesBackupTool
 
         private void Form2_Load(object sender, EventArgs e)
         {
-            
-            Control.ControlCollection controls =  flowLayoutPanel1.Controls;
+
+            Control.ControlCollection controls = flowLayoutPanel1.Controls;
             List<Dictionary<string, string>> userlist = GetAllUserInfo();
-            foreach (Dictionary<string, string> userinfo in userlist) {
+            foreach (Dictionary<string, string> userinfo in userlist)
+            {
                 FlowLayoutPanel panel = new FlowLayoutPanel();
                 panel.FlowDirection = FlowDirection.TopDown;
                 PictureBox pictureBox = new PictureBox();
                 Label label = new Label();
-                panel.Controls.Add(pictureBox);
                 panel.Controls.Add(label);
 
-                string uid=null;
-                string uname = null;
-                userinfo.TryGetValue("uid", out uid);
-                userinfo.TryGetValue("username", out uname);
+
+
+                string uid = userinfo["uid"];
+                string uname = userinfo["username"];
                 string imgpath = USERICONLOCATION + "\\" + uid + "_64.png";
 
-                pictureBox.Image = Image.FromFile(imgpath);
+                pictureBox.Image = OverDrawHeadImg(imgpath);
                 pictureBox.Size = new Size(32, 32);
                 pictureBox.SizeMode = PictureBoxSizeMode.Zoom;
                 pictureBox.Margin = new Padding(0, 0, 0, 0);
                 pictureBox.Parent = panel;
                 pictureBox.Dock = DockStyle.Fill;
+                panel.Controls.Add(pictureBox);
 
                 label.AutoSize = true;
-                label.TextAlign = ContentAlignment.MiddleLeft;
+                label.TextAlign = ContentAlignment.MiddleCenter;
                 label.Padding = new Padding(0, 0, 0, 0);
                 label.Margin = new Padding(0, 0, 0, 0);
                 label.Text = uname;
-                label.Dock = DockStyle.Bottom;
+                label.Dock = DockStyle.Top;
                 label.Parent = panel;
+                toolTip1.SetToolTip(pictureBox, uname);
 
                 panel.Parent = flowLayoutPanel1;
                 panel.AutoSize = true;
                 panel.Dock = DockStyle.Fill;
                 controls.Add(panel);
+
                 InitForm();
+                //CheckGameSaveDirectory();
+                InitGameListPanel();
             }
         }
-        public void InitForm() {
+        public void InitForm()
+        {
+            SelectedUid = GetAllUserInfo()[0]["uid"];
             button1.Size = new Size(flowLayoutPanel1.Height, flowLayoutPanel1.Height);
             button2.Size = new Size(flowLayoutPanel1.Height, flowLayoutPanel1.Height);
-            tableLayoutPanel1.Location = new Point(tableLayoutPanel1.Location.X,button1.Location.Y + button1.Height);
+            flowLayoutPanel2.Location = new Point(flowLayoutPanel2.Location.X, button1.Location.Y + button1.Height);
         }
 
         private void Form2_MouseDown(object sender, MouseEventArgs e)
@@ -206,10 +223,107 @@ namespace UbiGamesBackupTool
                 currentYPosition = MousePosition.Y;//鼠标的y坐标为当前窗体左上角y坐标  
             }
         }
-
+        /// <summary>
+        /// 重绘头像为圆形
+        /// </summary>
+        /// <param name="file">图片路径</param>
+        /// <returns>圆形头像</returns>
+        private Bitmap OverDrawHeadImg(string file)
+        {
+            using (Image i = new Bitmap(file))
+            {
+                Bitmap b = new Bitmap(i.Width, i.Height);
+                using (Graphics g = Graphics.FromImage(b))
+                {
+                    g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
+                    using (System.Drawing.Drawing2D.GraphicsPath p = new System.Drawing.Drawing2D.GraphicsPath(System.Drawing.Drawing2D.FillMode.Alternate))
+                    {
+                        p.AddEllipse(0, 0, i.Width, i.Height);
+                        g.FillPath(new TextureBrush(i), p);
+                    }
+                    //g.FillEllipse(new TextureBrush(i), 0, 0, i.Width, i.Height);
+                }
+                return b;
+            }
+        }
         private void Button2_Click(object sender, EventArgs e)
         {
             this.Close();
+        }
+        /// <summary>
+        /// 检查并获取已存在的存档的游戏
+        /// </summary>
+        /// <returns>检测到的已存在存档的游戏列表</returns>
+        public List<Game> CheckGameSaveDirectory()
+        {
+            Assembly assm = Assembly.GetExecutingAssembly();
+            Stream gamejson = assm.GetManifestResourceStream("UbiGamesBackupTool.game.json");
+            StreamReader stream = new StreamReader(gamejson);
+            List<Game> gamelist = JsonConvert.DeserializeObject<List<Game>>(stream.ReadToEnd());
+            List<Game> Ugamelist = new List<Game>();
+            if (SelectedUid != null)
+            {
+                foreach (string str in GetGameSaveDirectory(SelectedUid))
+                {
+                    foreach (Game g in gamelist)
+                    {
+                        if (g.id.Equals(str))
+                        {
+                            Ugamelist.Add(g);
+                            break;
+                        }
+                    }
+                }
+            }
+            return Ugamelist;
+        }
+        /// <summary>
+        /// 获取用户所有存档文件夹
+        /// </summary>
+        /// <param name="uid">用户UID</param>
+        /// <returns>返回存档文件夹名称，不包括路径</returns>
+        public String[] GetGameSaveDirectory(string uid)
+        {
+            String[] SaveDirectorys = Directory.GetDirectories(UPLAYSAVEGAME + "\\" + uid);
+            for (int i = 0; i < SaveDirectorys.Length; i++)
+            {
+                SaveDirectorys[i] = SaveDirectorys[i].Substring(SaveDirectorys[i].LastIndexOf('\\') + 1, SaveDirectorys[i].Length - SaveDirectorys[i].LastIndexOf('\\') - 1);
+            }
+            return SaveDirectorys;
+        }
+        public void InitGameListPanel()
+        {
+            List<Game> Ugamelist = CheckGameSaveDirectory();
+            foreach (Game g in Ugamelist)
+            {
+                //----------------------开始添加一个游戏在列表中---------------------
+                FlowLayoutPanel panel = new FlowLayoutPanel();
+                panel.FlowDirection = FlowDirection.TopDown;
+                panel.AutoSize = true;
+                PictureBox pictureBox = new PictureBox();
+                Label label = new Label();
+                panel.Controls.Add(pictureBox);
+                panel.Controls.Add(label);
+                flowLayoutPanel2.Controls.Add(panel);
+
+                pictureBox.Image = gamepanelbackground;
+                pictureBox.Size = new Size(340, 181);
+                pictureBox.SizeMode = PictureBoxSizeMode.CenterImage;
+                pictureBox.BackColor = Color.Black;
+
+
+                label.AutoSize = true;
+                label.Text = g.name;
+                label.TextAlign = ContentAlignment.MiddleCenter;
+                label.Dock = DockStyle.Bottom;
+                label.BackColor = Color.Blue;
+
+
+            }
+        }
+        public void ChangeUsered()
+        {
+
         }
     }
 }
