@@ -127,12 +127,23 @@ namespace UbiGamesBackupTool
                 button.BackgroundImageLayout = ImageLayout.Zoom;
                 button.FlatStyle = FlatStyle.Flat;
                 button.FlatAppearance.BorderSize = 0;
+                button.Tag = uid;
+                button.Click += new EventHandler(this.UserButtonClick);
                 toolTip1.SetToolTip(button, uname);
                 InitForm();
                 //CheckGameSaveDirectory();
                 InitGameListPanel();
             }
         }
+
+        private void UserButtonClick(object sender, EventArgs e)
+        {
+            SelectedUid = ((Button)sender).Tag.ToString();
+            flowLayoutPanel2.Controls.Clear();
+            InitGameListPanel();
+            GC.Collect();
+        }
+
         /// <summary>
         /// 初始化窗体
         /// </summary>
