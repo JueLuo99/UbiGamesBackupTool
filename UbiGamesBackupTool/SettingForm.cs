@@ -115,7 +115,7 @@ namespace UbiGamesBackupTool
 
         private void linkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            System.Diagnostics.Process.Start("http://qm.qq.com/cgi-bin/qm/qr?k=_lEhriVuqGMgLIYV-0RRNaPotaFC7_SZ");
+            System.Diagnostics.Process.Start("https://jq.qq.com/?_wv=1027&k=5VtIVZN");
         }
     }
 }
