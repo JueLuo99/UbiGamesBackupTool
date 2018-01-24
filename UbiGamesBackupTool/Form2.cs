@@ -21,10 +21,16 @@ namespace UbiGamesBackupTool
     {
 
         static string USERINFOLOCATION = System.Environment.GetEnvironmentVariable("USERPROFILE") + "\\AppData\\Local\\Ubisoft Game Launcher\\users.dat";
-        static string UPLAYSAVEGAME = GetUplayPath().Split(new char[] { '"', })[1].Substring(0, GetUplayPath().LastIndexOf('\\')) + "\\savegames";
-        static string USERICONLOCATION = GetUplayPath().Split(new char[] { '"', })[1].Substring(0, GetUplayPath().LastIndexOf('\\')) + "\\cache\\avatars";
+        static string UPLAYINSTALLLOCATION = GetUplayPath().Split(new char[] { '"', })[1].Substring(0, GetUplayPath().LastIndexOf('\\'));
+        static string UPLAYSAVEGAME = UPLAYINSTALLLOCATION + "\\savegames";
+        static string USERICONLOCATION = UPLAYINSTALLLOCATION + "\\cache\\avatars";
+        static string GAMELOGOCACHE = UPLAYINSTALLLOCATION + "\\cache\\assets";
 
         static Image gamepanelbackground = Properties.Resources.gamepanelbackground;
+
+        static Color GamePictureBoxSelectedColor = Color.FromArgb(192, 192, 192);
+        static Color GamePictureBoxSelectedBackColor = Color.FromArgb(108, 108, 108);
+        static Color GameNameLabelBackColor = Color.FromArgb(208, 208, 208);
 
         private string SelectedUid { get; set; } = null;
 
@@ -312,16 +318,20 @@ namespace UbiGamesBackupTool
                 panel.Controls.Add(label);
                 flowLayoutPanel2.Controls.Add(panel);
 
-                pictureBox.Image = gamepanelbackground;
+                if (File.Exists(GAMELOGOCACHE+"\\"+g.img))
+                    pictureBox.BackgroundImage = Image.FromFile(GAMELOGOCACHE + "\\" + g.img);
+                else
+                    pictureBox.BackgroundImage = gamepanelbackground;
                 pictureBox.Size = new Size(340, 181);
-                pictureBox.SizeMode = PictureBoxSizeMode.CenterImage;
-                pictureBox.BackColor = Color.FromArgb(192, 192, 192);
+                pictureBox.BackgroundImageLayout = ImageLayout.Zoom;
+                pictureBox.BackColor = GamePictureBoxSelectedColor;
                 pictureBox.Margin = new Padding(0, 0, 0, 0);
                 pictureBox.Click += new EventHandler(this.GamePanelClicked);
                 pictureBox.Tag = g.id;
 
                 CheckBox checkBox = new CheckBox();
                 pictureBox.Controls.Add(checkBox);
+                checkBox.AutoSize = true;
                 checkBox.Checked = false;
                 checkBox.Enabled = false;
                 //checkBox.CheckedChanged += new EventHandler(GamePanelChecked);
@@ -333,7 +343,7 @@ namespace UbiGamesBackupTool
                 label.Text = g.name;
                 label.TextAlign = ContentAlignment.MiddleCenter;
                 label.Dock = DockStyle.Bottom;
-                label.BackColor = Color.FromArgb(208, 208, 208);
+                label.BackColor = GameNameLabelBackColor;
             }
         }
 
@@ -364,11 +374,13 @@ namespace UbiGamesBackupTool
             if (SelectGameList.Contains(gid))
             {
                 SelectGameList.Remove(gid);
+                pictureBox.BackColor = GamePictureBoxSelectedColor;
                 ((CheckBox)pictureBox.Controls[0]).Checked = false;
             }
             else
             {
                 SelectGameList.Add(gid);
+                pictureBox.BackColor = GamePictureBoxSelectedBackColor;
                 ((CheckBox)pictureBox.Controls[0]).Checked = true;
             }
 
@@ -377,7 +389,6 @@ namespace UbiGamesBackupTool
         private void button1_Click(object sender, EventArgs e)
         {
             Form settingform = new SettingForm();
-
             settingform.Show();
             settingform.Location = this.Location;
         }
@@ -413,42 +424,32 @@ namespace UbiGamesBackupTool
         private void CopyDirectory(string srcdir, string desdir)
         {
             string folderName = srcdir.Substring(srcdir.LastIndexOf("\\") + 1);
-
             string desfolderdir = desdir + "\\" + folderName;
-
             if (desdir.LastIndexOf("\\") == (desdir.Length - 1))
             {
                 desfolderdir = desdir + folderName;
             }
             string[] filenames = Directory.GetFileSystemEntries(srcdir);
-
             foreach (string file in filenames)// 遍历所有的文件和目录
             {
                 if (Directory.Exists(file))// 先当作目录处理 如果存在这个目录就递归Copy该目录下面的文件
                 {
-
                     string currentdir = desfolderdir + "\\" + file.Substring(file.LastIndexOf("\\") + 1);
                     if (!Directory.Exists(currentdir))
                     {
                         Directory.CreateDirectory(currentdir);
                     }
-
                     CopyDirectory(file, desfolderdir);
                 }
 
                 else // 否则直接copy文件
                 {
                     string srcfileName = file.Substring(file.LastIndexOf("\\") + 1);
-
                     srcfileName = desfolderdir + "\\" + srcfileName;
-
-
                     if (!Directory.Exists(desfolderdir))
                     {
                         Directory.CreateDirectory(desfolderdir);
                     }
-
-
                     File.Copy(file, srcfileName, true);
                 }
             }
