@@ -201,7 +201,7 @@
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(95, 12);
             this.label2.TabIndex = 24;
-            this.label2.Text = "QQ群：680497357";
+            this.label2.Text = "QQ群：177565385";
             // 
             // button1
             // 
