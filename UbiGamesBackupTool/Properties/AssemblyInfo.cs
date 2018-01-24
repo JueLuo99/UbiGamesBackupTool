@@ -8,7 +8,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("UbiGamesBackupTool")]
 [assembly: AssemblyDescription("当前测试版仅提供简单的选择游戏存档备份功能。")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("setTile Studio")]
 [assembly: AssemblyProduct("UbiGamesBackupTool")]
 [assembly: AssemblyCopyright("Copyright 2018 setTile Studio. All rights reserved.")]
 [assembly: AssemblyTrademark("")]
