@@ -158,6 +158,7 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
+    <None Include="bin\Debug\Newtonsoft.Json.dll" />
     <Content Include="icon256.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
