@@ -132,8 +132,8 @@ namespace UbiGamesBackupTool
                 toolTip1.SetToolTip(button, uname);
                 InitForm();
                 //CheckGameSaveDirectory();
-                InitGameListPanel();
             }
+            InitGameListPanel();
         }
 
         private void UserButtonClick(object sender, EventArgs e)
@@ -293,6 +293,9 @@ namespace UbiGamesBackupTool
             }
             return new string[0];
         }
+        /// <summary>
+        /// 初始化游戏列表
+        /// </summary>
         public void InitGameListPanel()
         {
             List<Game> Ugamelist = CheckGameSaveDirectory();
@@ -349,7 +352,11 @@ namespace UbiGamesBackupTool
         //        Console.WriteLine("选中:" + gid);
         //    }
         //}
-
+        /// <summary>
+        /// 游戏列表中 pictureBox的点击事件
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void GamePanelClicked(object sender, EventArgs e)
         {
             PictureBox pictureBox = (PictureBox)sender;
