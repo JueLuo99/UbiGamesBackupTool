@@ -31,6 +31,7 @@ namespace UbiGamesBackupTool
         bool beginMove = false;//初始化鼠标位置  
         int currentXPosition;
         int currentYPosition;
+        List<string> SelectGameList = new List<string>();
 
         public Form2()
         {
@@ -92,7 +93,6 @@ namespace UbiGamesBackupTool
                             int unamestart = content.IndexOf("=2", uidend) + 3;
                             int unameend = content.IndexOf(':', unamestart);
                             string username = content.Substring(unamestart, unameend - unamestart);
-                            Console.WriteLine("UID:" + uid + "    UserName:" + username);
                             UserInfo.Add("uid", uid);
                             UserInfo.Add("username", username);
                             UserList.Add(UserInfo);
@@ -123,7 +123,7 @@ namespace UbiGamesBackupTool
                 string uname = userinfo["username"];
                 string imgpath = USERICONLOCATION + "\\" + uid + "_64.png";
                 button.BackgroundImage = OverDrawHeadImg(imgpath);
-                button.Size = new Size(40,40);
+                button.Size = new Size(40, 40);
                 button.BackgroundImageLayout = ImageLayout.Zoom;
                 button.FlatStyle = FlatStyle.Flat;
                 button.FlatAppearance.BorderSize = 0;
@@ -139,6 +139,7 @@ namespace UbiGamesBackupTool
         private void UserButtonClick(object sender, EventArgs e)
         {
             SelectedUid = ((Button)sender).Tag.ToString();
+            SelectGameList = new List<string>();
             flowLayoutPanel2.Controls.Clear();
             InitGameListPanel();
             GC.Collect();
@@ -308,8 +309,16 @@ namespace UbiGamesBackupTool
                 pictureBox.Image = gamepanelbackground;
                 pictureBox.Size = new Size(340, 181);
                 pictureBox.SizeMode = PictureBoxSizeMode.CenterImage;
-                pictureBox.BackColor = Color.FromArgb(192,192,192);
+                pictureBox.BackColor = Color.FromArgb(192, 192, 192);
                 pictureBox.Margin = new Padding(0, 0, 0, 0);
+                pictureBox.Click += new EventHandler(this.GamePanelClicked);
+                pictureBox.Tag = g.id;
+
+                CheckBox checkBox = new CheckBox();
+                pictureBox.Controls.Add(checkBox);
+                checkBox.Checked = false;
+                checkBox.Enabled = false;
+                //checkBox.CheckedChanged += new EventHandler(GamePanelChecked);
 
 
                 label.AutoSize = true;
@@ -318,12 +327,121 @@ namespace UbiGamesBackupTool
                 label.Text = g.name;
                 label.TextAlign = ContentAlignment.MiddleCenter;
                 label.Dock = DockStyle.Bottom;
-                label.BackColor = Color.FromArgb(208,208,208);
+                label.BackColor = Color.FromArgb(208, 208, 208);
             }
         }
-        public void ChangeUsered()
-        {
 
+        //private void GamePanelChecked(object sender, EventArgs e)
+        //{
+        //    PictureBox pictureBox = (PictureBox)((CheckBox)sender).Parent;
+        //    string gid = pictureBox.Tag.ToString();
+        //    if (SelectGameList.Contains(gid))
+        //    {
+        //        SelectGameList.Remove(gid);
+        //        Console.WriteLine("取消选中:" + gid);
+        //    }
+        //    else
+        //    {
+        //        SelectGameList.Add(gid);
+        //        Console.WriteLine("选中:" + gid);
+        //    }
+        //}
+
+        private void GamePanelClicked(object sender, EventArgs e)
+        {
+            PictureBox pictureBox = (PictureBox)sender;
+            string gid = pictureBox.Tag.ToString();
+            if (SelectGameList.Contains(gid))
+            {
+                SelectGameList.Remove(gid);
+                ((CheckBox)pictureBox.Controls[0]).Checked = false;
+            }
+            else
+            {
+                SelectGameList.Add(gid);
+                ((CheckBox)pictureBox.Controls[0]).Checked = true;
+            }
+
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            Form settingform = new SettingForm();
+
+            settingform.Show();
+            settingform.Location = this.Location;
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            if (SelectGameList.Count > 0)
+            {
+                if (DialogResult.OK == MessageBox.Show("确定要备份这些游戏？", "确定", MessageBoxButtons.OKCancel, MessageBoxIcon.Question))
+                {
+                    if (folderBrowserDialogBackupTo.ShowDialog() == DialogResult.OK)
+                    {
+                        String backupPath = folderBrowserDialogBackupTo.SelectedPath+"\\"+SelectedUid;
+                        foreach (string path in SelectGameList)
+                        {
+                            CopyDirectory(UPLAYSAVEGAME +"\\"+ SelectedUid +"\\"+ path, backupPath);
+                        }
+                        MessageBox.Show("备份完成！");
+                        GC.Collect();
+                    }
+                }
+            }
+            else
+            {
+                MessageBox.Show("还未选择游戏！");
+            }
+        }
+        /// <summary>
+        /// 复制存档目录
+        /// </summary>
+        /// <param name="srcdir"></param>
+        /// <param name="desdir"></param>
+        private void CopyDirectory(string srcdir, string desdir)
+        {
+            string folderName = srcdir.Substring(srcdir.LastIndexOf("\\") + 1);
+
+            string desfolderdir = desdir + "\\" + folderName;
+
+            if (desdir.LastIndexOf("\\") == (desdir.Length - 1))
+            {
+                desfolderdir = desdir + folderName;
+            }
+            string[] filenames = Directory.GetFileSystemEntries(srcdir);
+
+            foreach (string file in filenames)// 遍历所有的文件和目录
+            {
+                if (Directory.Exists(file))// 先当作目录处理 如果存在这个目录就递归Copy该目录下面的文件
+                {
+
+                    string currentdir = desfolderdir + "\\" + file.Substring(file.LastIndexOf("\\") + 1);
+                    if (!Directory.Exists(currentdir))
+                    {
+                        Directory.CreateDirectory(currentdir);
+                    }
+
+                    CopyDirectory(file, desfolderdir);
+                }
+
+                else // 否则直接copy文件
+                {
+                    string srcfileName = file.Substring(file.LastIndexOf("\\") + 1);
+
+                    srcfileName = desfolderdir + "\\" + srcfileName;
+
+
+                    if (!Directory.Exists(desfolderdir))
+                    {
+                        Directory.CreateDirectory(desfolderdir);
+                    }
+
+
+                    File.Copy(file, srcfileName, true);
+                }
+            }
         }
     }
 }
