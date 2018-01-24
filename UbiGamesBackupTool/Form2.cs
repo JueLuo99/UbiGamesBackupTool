@@ -310,7 +310,7 @@ namespace UbiGamesBackupTool
                 //----------------------开始添加一个游戏在列表中---------------------
                 FlowLayoutPanel panel = new FlowLayoutPanel();
                 panel.FlowDirection = FlowDirection.TopDown;
-                panel.AutoSize = true;
+                //panel.AutoSize = true;
 
                 PictureBox pictureBox = new PictureBox();
                 Label label = new Label();
@@ -344,6 +344,8 @@ namespace UbiGamesBackupTool
                 label.TextAlign = ContentAlignment.MiddleCenter;
                 label.Dock = DockStyle.Bottom;
                 label.BackColor = GameNameLabelBackColor;
+
+                panel.Size = new Size(pictureBox.Width, pictureBox.Height + label.Height);
             }
         }
 
