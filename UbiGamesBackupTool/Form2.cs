@@ -283,12 +283,15 @@ namespace UbiGamesBackupTool
         /// <returns>返回存档文件夹名称，不包括路径</returns>
         public String[] GetGameSaveDirectory(string uid)
         {
-            String[] SaveDirectorys = Directory.GetDirectories(UPLAYSAVEGAME + "\\" + uid);
-            for (int i = 0; i < SaveDirectorys.Length; i++)
-            {
-                SaveDirectorys[i] = SaveDirectorys[i].Substring(SaveDirectorys[i].LastIndexOf('\\') + 1, SaveDirectorys[i].Length - SaveDirectorys[i].LastIndexOf('\\') - 1);
+            if (Directory.Exists(UPLAYSAVEGAME + "\\" + uid)) {
+                String[] SaveDirectorys = Directory.GetDirectories(UPLAYSAVEGAME + "\\" + uid);
+                for (int i = 0; i < SaveDirectorys.Length; i++)
+                {
+                    SaveDirectorys[i] = SaveDirectorys[i].Substring(SaveDirectorys[i].LastIndexOf('\\') + 1, SaveDirectorys[i].Length - SaveDirectorys[i].LastIndexOf('\\') - 1);
+                }
+                return SaveDirectorys;
             }
-            return SaveDirectorys;
+            return new string[0];
         }
         public void InitGameListPanel()
         {
