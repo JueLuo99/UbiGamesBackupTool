@@ -97,6 +97,7 @@
     <Compile Include="SettingForm.Designer.cs">
       <DependentUpon>SettingForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="UserInfo.cs" />
     <EmbeddedResource Include="Form2.resx">
       <DependentUpon>Form2.cs</DependentUpon>
     </EmbeddedResource>
@@ -149,6 +150,8 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
+    <None Include="Resources\restore.png" />
+    <None Include="Resources\changemode.png" />
     <None Include="bin\Debug\Newtonsoft.Json.dll" />
     <Content Include="icon256.ico" />
   </ItemGroup>

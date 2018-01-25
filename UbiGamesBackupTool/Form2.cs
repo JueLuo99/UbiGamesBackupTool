@@ -35,6 +35,11 @@ namespace UbiGamesBackupTool
 
         private string SelectedUid { get; set; } = null;
 
+        private enum ToolMode
+        {
+            Backup, Restore
+        }
+        ToolMode toolMode = ToolMode.Backup;
         bool beginMove = false;//初始化鼠标位置  
         int currentXPosition;
         int currentYPosition;
@@ -58,7 +63,7 @@ namespace UbiGamesBackupTool
         /// <summary>
         /// 获取Uplay路径
         /// </summary>
-        /// <returns></returns>
+        /// <returns>Uplay路径</returns>
         private static string GetUplayPath()
         {
             try
@@ -86,9 +91,9 @@ namespace UbiGamesBackupTool
         /// 获取所有用户信息
         /// </summary>
         /// <returns>返回所有用户的集合</returns>
-        public List<Dictionary<string, string>> GetAllUserInfo()
+        public static List<UserInfo> GetBackupAllUserInfo()
         {
-            List<Dictionary<string, string>> UserList = new List<Dictionary<string, string>>();
+            List<UserInfo> UserList = new List<UserInfo>();
             try
             {
                 using (Stream stream = new FileStream(USERINFOLOCATION, FileMode.Open, FileAccess.Read))
@@ -102,7 +107,7 @@ namespace UbiGamesBackupTool
                         {
                             UserCount++;
                             //Console.WriteLine("第"+UserCount+"个用户，位置"+pos);
-                            Dictionary<string, string> UserInfo = new Dictionary<string, string>();
+                            UserInfo user = new UserInfo();
                             int uidstart = content.IndexOf('$', pos) + 1;
                             int uidend = content.IndexOf('*', uidstart);
                             string uid = content.Substring(uidstart, uidend - uidstart);
@@ -110,9 +115,10 @@ namespace UbiGamesBackupTool
                             int unamestart = content.IndexOf("=2", uidend) + 3;
                             int unameend = content.IndexOf(':', unamestart);
                             string username = content.Substring(unamestart, unameend - unamestart);
-                            UserInfo.Add("uid", uid);
-                            UserInfo.Add("username", username);
-                            UserList.Add(UserInfo);
+                            user.UID=uid;
+                            user.UNAME=username;
+                            user.USERSAVEGAME = UPLAYSAVEGAME + Path.DirectorySeparatorChar + uid;
+                            UserList.Add(user);
                         }
 
                     }
@@ -124,20 +130,54 @@ namespace UbiGamesBackupTool
             }
             return UserList;
         }
-
+        /// <summary>
+        /// 获取需要还原存档的用户列表
+        /// </summary>
+        /// <param name="path">备份路径</param>
+        /// <returns>用户列表</returns>
+        public static List<UserInfo> GetReStoreUserList(string path)
+        {
+            List<UserInfo> UserList = new List<UserInfo>();
+            string[] userpath = Directory.GetDirectories(path);
+            foreach (string dir in userpath)
+            {
+                //string[] file = Directory.GetFiles(dir, "*.json");
+                //if (file.Length!=1) {
+                //    continue;
+                //}
+                string userjson = dir + Path.DirectorySeparatorChar + "userinfo.json";
+                if (File.Exists(userjson))
+                {
+                    using (Stream stream = new FileStream(userjson, FileMode.Open))
+                    {
+                        using (StreamReader reader = new StreamReader(stream))
+                        {
+                            UserInfo user = JsonConvert.DeserializeObject<UserInfo>(reader.ReadToEnd());
+                            user.USERSAVEGAME = dir;
+                            UserList.Add(user);
+                        }
+                    }
+                }
+                else
+                {
+                    continue;
+                }
+            }
+            return UserList;
+        }
         private void Form2_Load(object sender, EventArgs e)
         {
             Control.ControlCollection controls = flowLayoutPanel1.Controls;
-            List<Dictionary<string, string>> userlist = GetAllUserInfo();
-            foreach (Dictionary<string, string> userinfo in userlist)
+            List<UserInfo> userlist = GetBackupAllUserInfo();
+            foreach (UserInfo userinfo in userlist)
             {
                 //-----------------------------开始添加用户---------------------------
 
                 Button button = new Button();
                 button.Margin = new Padding(0, 0, 0, 0);
                 flowLayoutPanel1.Controls.Add(button);
-                string uid = userinfo["uid"];
-                string uname = userinfo["username"];
+                string uid = userinfo.UID;
+                string uname = userinfo.UNAME;
                 string imgpath = USERICONLOCATION + "\\" + uid + "_64.png";
                 button.BackgroundImage = OverDrawHeadImg(imgpath);
                 button.Size = new Size(40, 40);
@@ -152,12 +192,17 @@ namespace UbiGamesBackupTool
             }
             InitGameListPanel();
         }
-
+        /// <summary>
+        /// 切换用户
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void UserButtonClick(object sender, EventArgs e)
         {
             SelectedUid = ((Button)sender).Tag.ToString();
             SelectGameList = new List<string>();
-            flowLayoutPanel2.Controls.Clear();
+            //flowLayoutPanel2.Controls.Clear();
+            tableLayoutPanel1.Controls.Clear();
             InitGameListPanel();
             GC.Collect();
         }
@@ -167,15 +212,18 @@ namespace UbiGamesBackupTool
         /// </summary>
         public void InitForm()
         {
-            SelectedUid = GetAllUserInfo()[0]["uid"];
+            SelectedUid = GetBackupAllUserInfo()[0].UID;
             button1.Size = new Size(flowLayoutPanel1.Height, flowLayoutPanel1.Height);
             button2.Size = new Size(flowLayoutPanel1.Height, flowLayoutPanel1.Height);
             flowLayoutPanel1.Width = this.Width - button1.Width * 2;
             flowLayoutPanel1.Location = new Point(button1.Width, 0);
             button2.Location = new Point(this.Width - button2.Width, 0);
-            flowLayoutPanel2.Location = new Point(flowLayoutPanel2.Location.X, button1.Location.Y + button1.Height);
-            flowLayoutPanel2.Height = this.Height - flowLayoutPanel2.Location.Y;
-            panel1.Location = new Point(panel1.Location.X, flowLayoutPanel2.Location.Y);
+            //flowLayoutPanel2.Location = new Point(flowLayoutPanel2.Location.X, button1.Location.Y + button1.Height);
+            //flowLayoutPanel2.Height = this.Height - flowLayoutPanel2.Location.Y;
+            //panel1.Location = new Point(panel1.Location.X, flowLayoutPanel2.Location.Y);
+            tableLayoutPanel1.Location = new Point(tableLayoutPanel1.Location.X, button1.Location.Y + button1.Height);
+            tableLayoutPanel1.Height = this.Height - tableLayoutPanel1.Location.Y;
+            panel1.Location = new Point(panel1.Location.X, tableLayoutPanel1.Location.Y);
         }
 
         private void Form2_MouseDown(object sender, MouseEventArgs e)
@@ -267,15 +315,27 @@ namespace UbiGamesBackupTool
             this.Close();
         }
         /// <summary>
-        /// 检查并获取已存在的存档的游戏
+        /// 获取支持的游戏列表
         /// </summary>
-        /// <returns>检测到的已存在存档的游戏列表</returns>
-        public List<Game> CheckGameSaveDirectory()
+        /// <returns></returns>
+        public List<Game> GetSupportGame()
         {
             Assembly assm = Assembly.GetExecutingAssembly();
             Stream gamejson = assm.GetManifestResourceStream("UbiGamesBackupTool.game.json");
             StreamReader stream = new StreamReader(gamejson);
             List<Game> gamelist = JsonConvert.DeserializeObject<List<Game>>(stream.ReadToEnd());
+            gamejson.Close();
+            stream.Close();
+            return gamelist;
+        }
+
+        /// <summary>
+        /// 检查并获取已存在的存档的游戏
+        /// </summary>
+        /// <returns>检测到的已存在存档的游戏列表</returns>
+        public List<Game> CheckGameSaveDirectory()
+        {
+            List<Game> gamelist = GetSupportGame();
             List<Game> Ugamelist = new List<Game>();
             if (SelectedUid != null)
             {
@@ -300,7 +360,8 @@ namespace UbiGamesBackupTool
         /// <returns>返回存档文件夹名称，不包括路径</returns>
         public String[] GetGameSaveDirectory(string uid)
         {
-            if (Directory.Exists(UPLAYSAVEGAME + "\\" + uid)) {
+            if (Directory.Exists(UPLAYSAVEGAME + "\\" + uid))
+            {
                 String[] SaveDirectorys = Directory.GetDirectories(UPLAYSAVEGAME + "\\" + uid);
                 for (int i = 0; i < SaveDirectorys.Length; i++)
                 {
@@ -327,9 +388,9 @@ namespace UbiGamesBackupTool
                 Label label = new Label();
                 panel.Controls.Add(pictureBox);
                 panel.Controls.Add(label);
-                flowLayoutPanel2.Controls.Add(panel);
+                tableLayoutPanel1.Controls.Add(panel);
 
-                if (File.Exists(GAMELOGOCACHE+"\\"+g.img))
+                if (File.Exists(GAMELOGOCACHE + "\\" + g.img))
                     pictureBox.BackgroundImage = Image.FromFile(GAMELOGOCACHE + "\\" + g.img);
                 else
                     pictureBox.BackgroundImage = gamepanelbackground;
@@ -357,6 +418,7 @@ namespace UbiGamesBackupTool
                 label.BackColor = GameNameLabelBackColor;
 
                 panel.Size = new Size(pictureBox.Width, pictureBox.Height + label.Height);
+                panel.Anchor = AnchorStyles.None;
             }
         }
 
@@ -414,10 +476,10 @@ namespace UbiGamesBackupTool
                 {
                     if (folderBrowserDialogBackupTo.ShowDialog() == DialogResult.OK)
                     {
-                        String backupPath = folderBrowserDialogBackupTo.SelectedPath+"\\"+SelectedUid;
+                        String backupPath = folderBrowserDialogBackupTo.SelectedPath + "\\" + SelectedUid;
                         foreach (string path in SelectGameList)
                         {
-                            CopyDirectory(UPLAYSAVEGAME +"\\"+ SelectedUid +"\\"+ path, backupPath);
+                            CopyDirectory(UPLAYSAVEGAME + "\\" + SelectedUid + "\\" + path, backupPath);
                         }
                         MessageBox.Show("备份完成！");
                         GC.Collect();
@@ -432,8 +494,8 @@ namespace UbiGamesBackupTool
         /// <summary>
         /// 复制存档目录
         /// </summary>
-        /// <param name="srcdir"></param>
-        /// <param name="desdir"></param>
+        /// <param name="srcdir">游戏存档源文件夹</param>
+        /// <param name="desdir">目标存档文件夹</param>
         private void CopyDirectory(string srcdir, string desdir)
         {
             string folderName = srcdir.Substring(srcdir.LastIndexOf("\\") + 1);
@@ -465,6 +527,28 @@ namespace UbiGamesBackupTool
                     }
                     File.Copy(file, srcfileName, true);
                 }
+            }
+        }
+
+        public void CheckGameVersion(string srcdir, string gid)
+        {
+
+        }
+
+        private void ChangeMode(object sender, EventArgs e)
+        {
+            if (this.toolMode == ToolMode.Backup)
+            {
+                button3.Visible = false;
+                button5.Visible = true;
+                toolMode = ToolMode.Restore;
+
+            }
+            else
+            {
+                button3.Visible = true;
+                button5.Visible = false;
+                toolMode = ToolMode.Backup;
             }
         }
     }
