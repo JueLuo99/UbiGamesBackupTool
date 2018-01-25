@@ -119,6 +119,7 @@
             this.flowLayoutPanel2.Name = "flowLayoutPanel2";
             this.flowLayoutPanel2.Size = new System.Drawing.Size(784, 398);
             this.flowLayoutPanel2.TabIndex = 5;
+            this.flowLayoutPanel2.Visible = false;
             // 
             // panel1
             // 
