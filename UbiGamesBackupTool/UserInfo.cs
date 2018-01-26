@@ -10,6 +10,7 @@ namespace UbiGamesBackupTool
     {
         public string UID { get; set; }
         public string UNAME { get; set; }
+        public string BackupTime { get; set; }
         public string USERSAVEGAME { get; set; }
     }
 }

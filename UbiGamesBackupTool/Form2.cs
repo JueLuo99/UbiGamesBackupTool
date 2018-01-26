@@ -28,12 +28,12 @@ namespace UbiGamesBackupTool
         static string GAMELOGOCACHE = UPLAYINSTALLLOCATION + "\\cache\\assets";
 
         static Image gamepanelbackground = Properties.Resources.gamepanelbackground;
-
+        static char DirChar = '-';
         static Color GamePictureBoxSelectedColor = Color.FromArgb(192, 192, 192);
         static Color GamePictureBoxSelectedBackColor = Color.FromArgb(108, 108, 108);
         static Color GameNameLabelBackColor = Color.FromArgb(208, 208, 208);
 
-        private string SelectedUid { get; set; } = null;
+        private UserInfo SelectUser { get; set; } = null;
 
         private enum ToolMode
         {
@@ -50,14 +50,14 @@ namespace UbiGamesBackupTool
             AppDomain.CurrentDomain.AssemblyResolve += new ResolveEventHandler(CurrentDomain_AssemblyResolve);
             InitializeComponent();
         }
-        private System.Reflection.Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
+        private Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
         {
             string dllName = args.Name.Contains(",") ? args.Name.Substring(0, args.Name.IndexOf(',')) : args.Name.Replace(".dll", "");
             dllName = dllName.Replace(".", "_");
             if (dllName.EndsWith("_resources")) return null;
-            System.Resources.ResourceManager rm = new System.Resources.ResourceManager(GetType().Namespace + ".Properties.Resources", System.Reflection.Assembly.GetExecutingAssembly());
+            ResourceManager rm = new System.Resources.ResourceManager(GetType().Namespace + ".Properties.Resources", System.Reflection.Assembly.GetExecutingAssembly());
             byte[] bytes = (byte[])rm.GetObject(dllName);
-            return System.Reflection.Assembly.Load(bytes);
+            return Assembly.Load(bytes);
         }
 
         /// <summary>
@@ -115,8 +115,8 @@ namespace UbiGamesBackupTool
                             int unamestart = content.IndexOf("=2", uidend) + 3;
                             int unameend = content.IndexOf(':', unamestart);
                             string username = content.Substring(unamestart, unameend - unamestart);
-                            user.UID=uid;
-                            user.UNAME=username;
+                            user.UID = uid;
+                            user.UNAME = username;
                             user.USERSAVEGAME = UPLAYSAVEGAME + Path.DirectorySeparatorChar + uid;
                             UserList.Add(user);
                         }
@@ -167,8 +167,23 @@ namespace UbiGamesBackupTool
         }
         private void Form2_Load(object sender, EventArgs e)
         {
+            InitForm();
+            InitUserList(UPLAYSAVEGAME);
+        }
+        public void InitUserList(String path)
+        {
             Control.ControlCollection controls = flowLayoutPanel1.Controls;
-            List<UserInfo> userlist = GetBackupAllUserInfo();
+            List<UserInfo> userlist = null;
+            SelectGameList = new List<string>();
+            switch (toolMode)
+            {
+                case ToolMode.Backup:
+                    userlist = GetBackupAllUserInfo();
+                    break;
+                case ToolMode.Restore:
+                    userlist = GetReStoreUserList(path);
+                    break;
+            }
             foreach (UserInfo userinfo in userlist)
             {
                 //-----------------------------开始添加用户---------------------------
@@ -176,20 +191,18 @@ namespace UbiGamesBackupTool
                 Button button = new Button();
                 button.Margin = new Padding(0, 0, 0, 0);
                 flowLayoutPanel1.Controls.Add(button);
-                string uid = userinfo.UID;
-                string uname = userinfo.UNAME;
-                string imgpath = USERICONLOCATION + "\\" + uid + "_64.png";
+                string imgpath = USERICONLOCATION + "\\" + userinfo.UID + "_64.png";
                 button.BackgroundImage = OverDrawHeadImg(imgpath);
                 button.Size = new Size(40, 40);
                 button.BackgroundImageLayout = ImageLayout.Zoom;
                 button.FlatStyle = FlatStyle.Flat;
                 button.FlatAppearance.BorderSize = 0;
-                button.Tag = uid;
+                button.Tag = userinfo;
                 button.Click += new EventHandler(this.UserButtonClick);
-                toolTip1.SetToolTip(button, uname);
-                InitForm();
+                toolTip1.SetToolTip(button, userinfo.UNAME);
                 //CheckGameSaveDirectory();
             }
+            SelectUser = userlist[0];
             InitGameListPanel();
         }
         /// <summary>
@@ -199,7 +212,7 @@ namespace UbiGamesBackupTool
         /// <param name="e"></param>
         private void UserButtonClick(object sender, EventArgs e)
         {
-            SelectedUid = ((Button)sender).Tag.ToString();
+            SelectUser = (UserInfo)((Button)sender).Tag;
             SelectGameList = new List<string>();
             //flowLayoutPanel2.Controls.Clear();
             tableLayoutPanel1.Controls.Clear();
@@ -212,7 +225,6 @@ namespace UbiGamesBackupTool
         /// </summary>
         public void InitForm()
         {
-            SelectedUid = GetBackupAllUserInfo()[0].UID;
             button1.Size = new Size(flowLayoutPanel1.Height, flowLayoutPanel1.Height);
             button2.Size = new Size(flowLayoutPanel1.Height, flowLayoutPanel1.Height);
             flowLayoutPanel1.Width = this.Width - button1.Width * 2;
@@ -337,9 +349,9 @@ namespace UbiGamesBackupTool
         {
             List<Game> gamelist = GetSupportGame();
             List<Game> Ugamelist = new List<Game>();
-            if (SelectedUid != null)
+            if (SelectUser != null)
             {
-                foreach (string str in GetGameSaveDirectory(SelectedUid))
+                foreach (string str in GetGameSaveDirectory())
                 {
                     foreach (Game g in gamelist)
                     {
@@ -358,11 +370,11 @@ namespace UbiGamesBackupTool
         /// </summary>
         /// <param name="uid">用户UID</param>
         /// <returns>返回存档文件夹名称，不包括路径</returns>
-        public String[] GetGameSaveDirectory(string uid)
+        public String[] GetGameSaveDirectory()
         {
-            if (Directory.Exists(UPLAYSAVEGAME + "\\" + uid))
+            if (Directory.Exists(SelectUser.USERSAVEGAME))
             {
-                String[] SaveDirectorys = Directory.GetDirectories(UPLAYSAVEGAME + "\\" + uid);
+                String[] SaveDirectorys = Directory.GetDirectories(SelectUser.USERSAVEGAME);
                 for (int i = 0; i < SaveDirectorys.Length; i++)
                 {
                     SaveDirectorys[i] = SaveDirectorys[i].Substring(SaveDirectorys[i].LastIndexOf('\\') + 1, SaveDirectorys[i].Length - SaveDirectorys[i].LastIndexOf('\\') - 1);
@@ -376,6 +388,9 @@ namespace UbiGamesBackupTool
         /// </summary>
         public void InitGameListPanel()
         {
+            tableLayoutPanel1.ColumnStyles.Clear();
+            tableLayoutPanel1.RowStyles.Clear();
+            tableLayoutPanel1.Controls.Clear();
             List<Game> Ugamelist = CheckGameSaveDirectory();
             foreach (Game g in Ugamelist)
             {
@@ -420,6 +435,7 @@ namespace UbiGamesBackupTool
                 panel.Size = new Size(pictureBox.Width, pictureBox.Height + label.Height);
                 panel.Anchor = AnchorStyles.None;
             }
+            GC.Collect();
         }
 
         //private void GamePanelChecked(object sender, EventArgs e)
@@ -468,7 +484,7 @@ namespace UbiGamesBackupTool
             settingform.Location = this.Location;
         }
 
-        private void button3_Click(object sender, EventArgs e)
+        private void BackupSaveGame(object sender, EventArgs e)
         {
             if (SelectGameList.Count > 0)
             {
@@ -476,11 +492,14 @@ namespace UbiGamesBackupTool
                 {
                     if (folderBrowserDialogBackupTo.ShowDialog() == DialogResult.OK)
                     {
-                        String backupPath = folderBrowserDialogBackupTo.SelectedPath + "\\" + SelectedUid;
+                        SelectUser.BackupTime = string.Format("{0:yyyy-MM-dd HH.mm.ss}", DateTime.Now);
+                        String backupPath = folderBrowserDialogBackupTo.SelectedPath + Path.DirectorySeparatorChar + SelectUser.UNAME + DirChar + SelectUser.BackupTime;
+
                         foreach (string path in SelectGameList)
                         {
-                            CopyDirectory(UPLAYSAVEGAME + "\\" + SelectedUid + "\\" + path, backupPath);
+                            CopyDirectory(UPLAYSAVEGAME + Path.DirectorySeparatorChar + SelectUser.UID + Path.DirectorySeparatorChar + path, backupPath);
                         }
+                        OutBackupInfo(backupPath);
                         MessageBox.Show("备份完成！");
                         GC.Collect();
                     }
@@ -516,7 +535,6 @@ namespace UbiGamesBackupTool
                     }
                     CopyDirectory(file, desfolderdir);
                 }
-
                 else // 否则直接copy文件
                 {
                     string srcfileName = file.Substring(file.LastIndexOf("\\") + 1);
@@ -529,26 +547,84 @@ namespace UbiGamesBackupTool
                 }
             }
         }
-
+        /// <summary>
+        /// 输出备份信息
+        /// </summary>
+        /// <param name="path"></param>
+        public void OutBackupInfo(string path)
+        {
+            using (Stream stream = new FileStream(path + Path.DirectorySeparatorChar + "userinfo.json", FileMode.Create))
+            {
+                using (StreamWriter writer = new StreamWriter(stream))
+                {
+                    writer.WriteLine(JsonConvert.SerializeObject(SelectUser));
+                    writer.Flush();
+                }
+            }
+        }
+        /// <summary>
+        /// 检查游戏存档版本
+        /// </summary>
+        /// <param name="srcdir"></param>
+        /// <param name="gid"></param>
         public void CheckGameVersion(string srcdir, string gid)
         {
 
         }
-
+        /// <summary>
+        /// 切换备份或还原
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void ChangeMode(object sender, EventArgs e)
         {
+
             if (this.toolMode == ToolMode.Backup)
             {
-                button3.Visible = false;
-                button5.Visible = true;
-                toolMode = ToolMode.Restore;
+                if (folderBrowserDialogBackupTo.ShowDialog() == DialogResult.OK)
+                {
+                    button3.Visible = false;
+                    button5.Visible = true;
+                    toolMode = ToolMode.Restore;
 
+                    flowLayoutPanel1.Controls.Clear();
+
+                    InitUserList(folderBrowserDialogBackupTo.SelectedPath);
+                    InitGameListPanel();
+                }
             }
             else
             {
                 button3.Visible = true;
                 button5.Visible = false;
                 toolMode = ToolMode.Backup;
+
+                flowLayoutPanel1.Controls.Clear();
+
+                InitUserList(UPLAYSAVEGAME);
+                InitGameListPanel();
+            }
+        }
+
+        private void ReStoreSaveGame(object sender, EventArgs e)
+        {
+            if (SelectGameList.Count > 0)
+            {
+                if (DialogResult.OK == MessageBox.Show("确定要还原这些游戏？", "确定", MessageBoxButtons.OKCancel, MessageBoxIcon.Question))
+                {
+                        String ReStorePath = UPLAYSAVEGAME+Path.DirectorySeparatorChar+SelectUser.UID;
+
+                        foreach (string GID in SelectGameList)
+                        {
+                            CopyDirectory(SelectUser.USERSAVEGAME+Path.DirectorySeparatorChar+GID, ReStorePath);
+                        }
+                        MessageBox.Show("还原完成！");
+                        GC.Collect();
+                }
+            }
+            else
+            {
+                MessageBox.Show("还未选择存档！");
             }
         }
     }
