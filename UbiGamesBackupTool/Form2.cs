@@ -32,9 +32,9 @@ namespace UbiGamesBackupTool
         static Color GamePictureBoxSelectedColor = Color.FromArgb(192, 192, 192);
         static Color GamePictureBoxSelectedBackColor = Color.FromArgb(108, 108, 108);
         static Color GameNameLabelBackColor = Color.FromArgb(208, 208, 208);
-
+        static private List<Game> SupportGameList { get; set; } = GetSupportGame();
         private UserInfo SelectUser { get; set; } = null;
-
+        
         private enum ToolMode
         {
             Backup, Restore
@@ -230,12 +230,14 @@ namespace UbiGamesBackupTool
             flowLayoutPanel1.Width = this.Width - button1.Width * 2;
             flowLayoutPanel1.Location = new Point(button1.Width, 0);
             button2.Location = new Point(this.Width - button2.Width, 0);
+            toolstatus.Location = new Point(0, button1.Height);
+            toolstatus.Size = new Size(this.Width - panel1.Width, toolstatus.Height);
             //flowLayoutPanel2.Location = new Point(flowLayoutPanel2.Location.X, button1.Location.Y + button1.Height);
             //flowLayoutPanel2.Height = this.Height - flowLayoutPanel2.Location.Y;
             //panel1.Location = new Point(panel1.Location.X, flowLayoutPanel2.Location.Y);
-            tableLayoutPanel1.Location = new Point(tableLayoutPanel1.Location.X, button1.Location.Y + button1.Height);
+            tableLayoutPanel1.Location = new Point(tableLayoutPanel1.Location.X, button1.Location.Y + button1.Height+toolstatus.Height);
             tableLayoutPanel1.Height = this.Height - tableLayoutPanel1.Location.Y;
-            panel1.Location = new Point(panel1.Location.X, tableLayoutPanel1.Location.Y);
+            panel1.Location = new Point(panel1.Location.X, toolstatus.Location.Y);
         }
 
         private void Form2_MouseDown(object sender, MouseEventArgs e)
@@ -330,7 +332,7 @@ namespace UbiGamesBackupTool
         /// 获取支持的游戏列表
         /// </summary>
         /// <returns></returns>
-        public List<Game> GetSupportGame()
+        public static List<Game> GetSupportGame()
         {
             Assembly assm = Assembly.GetExecutingAssembly();
             Stream gamejson = assm.GetManifestResourceStream("UbiGamesBackupTool.game.json");
@@ -347,7 +349,7 @@ namespace UbiGamesBackupTool
         /// <returns>检测到的已存在存档的游戏列表</returns>
         public List<Game> CheckGameSaveDirectory()
         {
-            List<Game> gamelist = GetSupportGame();
+            List<Game> gamelist = SupportGameList;
             List<Game> Ugamelist = new List<Game>();
             if (SelectUser != null)
             {
@@ -504,6 +506,7 @@ namespace UbiGamesBackupTool
                         GC.Collect();
                     }
                 }
+                folderBrowserDialogBackupTo.Dispose();
             }
             else
             {
@@ -591,7 +594,9 @@ namespace UbiGamesBackupTool
 
                     InitUserList(folderBrowserDialogBackupTo.SelectedPath);
                     InitGameListPanel();
+                    toolstatus.Text = "由"+SelectUser.UNAME+"备份于" + SelectUser.BackupTime;
                 }
+                folderBrowserDialogBackupTo.Dispose();
             }
             else
             {
@@ -603,6 +608,7 @@ namespace UbiGamesBackupTool
 
                 InitUserList(UPLAYSAVEGAME);
                 InitGameListPanel();
+                toolstatus.Text = "选择将要备份的游戏存档";
             }
         }
 
@@ -626,6 +632,11 @@ namespace UbiGamesBackupTool
             {
                 MessageBox.Show("还未选择存档！");
             }
+        }
+
+        private void TableLayoutPanel1_SizeChanged(object sender, EventArgs e)
+        {
+
         }
     }
 }

@@ -40,6 +40,7 @@
             this.panel1 = new System.Windows.Forms.Panel();
             this.folderBrowserDialogBackupTo = new System.Windows.Forms.FolderBrowserDialog();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
+            this.toolstatus = new System.Windows.Forms.Label();
             this.panel1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -160,14 +161,24 @@
             this.tableLayoutPanel1.ColumnCount = 2;
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 42);
+            this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 64);
             this.tableLayoutPanel1.Margin = new System.Windows.Forms.Padding(0);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             this.tableLayoutPanel1.RowCount = 2;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(790, 387);
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(790, 365);
             this.tableLayoutPanel1.TabIndex = 7;
+            this.tableLayoutPanel1.SizeChanged += new System.EventHandler(this.TableLayoutPanel1_SizeChanged);
+            // 
+            // toolstatus
+            // 
+            this.toolstatus.Location = new System.Drawing.Point(0, 42);
+            this.toolstatus.Name = "toolstatus";
+            this.toolstatus.Size = new System.Drawing.Size(100, 23);
+            this.toolstatus.TabIndex = 8;
+            this.toolstatus.Text = "选择将要备份的游戏存档";
+            this.toolstatus.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // Form2
             // 
@@ -175,6 +186,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.Control;
             this.ClientSize = new System.Drawing.Size(838, 441);
+            this.Controls.Add(this.toolstatus);
             this.Controls.Add(this.tableLayoutPanel1);
             this.Controls.Add(this.panel1);
             this.Controls.Add(this.button2);
@@ -206,5 +218,6 @@
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
         private System.Windows.Forms.Button button4;
         private System.Windows.Forms.Button button5;
+        private System.Windows.Forms.Label toolstatus;
     }
 }
