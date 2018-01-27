@@ -584,6 +584,7 @@ namespace UbiGamesBackupTool
 
             if (this.toolMode == ToolMode.Backup)
             {
+                MessageBox.Show("请选择备份的位置以开始还原");
                 if (folderBrowserDialogBackupTo.ShowDialog() == DialogResult.OK)
                 {
                     button3.Visible = false;
@@ -591,10 +592,26 @@ namespace UbiGamesBackupTool
                     toolMode = ToolMode.Restore;
 
                     flowLayoutPanel1.Controls.Clear();
-
-                    InitUserList(folderBrowserDialogBackupTo.SelectedPath);
-                    InitGameListPanel();
-                    toolstatus.Text = "由"+SelectUser.UNAME+"备份于" + SelectUser.BackupTime;
+                    try
+                    {
+                        
+                        InitUserList(folderBrowserDialogBackupTo.SelectedPath);
+                        InitGameListPanel();
+                        toolstatus.Text = "由" + SelectUser.UNAME + "备份于" + SelectUser.BackupTime;
+                    }
+                    catch (Exception)
+                    {
+                        
+                        toolMode = ToolMode.Backup;
+                        button3.Visible = true;
+                        button5.Visible = false;
+                        //throw;
+                        InitUserList(UPLAYSAVEGAME);
+                        InitGameListPanel();
+                        toolstatus.Text = "选择将要备份的游戏存档";
+                        MessageBox.Show("这个路径里并没有备份好的存档！回到备份模式");
+                    }
+                   
                 }
                 folderBrowserDialogBackupTo.Dispose();
             }
